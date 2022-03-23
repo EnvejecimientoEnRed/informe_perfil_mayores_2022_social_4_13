@@ -26,8 +26,70 @@ export function initChart(iframe) {
 
         data = data.filter(function(item){if(item['Características demográficas'] != 'Total Personas'){ return item; }});
 
-        function init() {
+        ///// Desarrollo de los tres gráficos
+        let currentEdad = '65_74';
 
+        let margin = {top: 10, right: 10, bottom: 30, left: 35},
+            width = document.getElementById('chart').clientWidth - margin.left - margin.right,
+            height = document.getElementById('chart').clientHeight - margin.top - margin.bottom;
+
+        let sumstat = d3.nest()
+            .key(function(d) { return d['Características demográficas'];})
+            .entries(data);
+
+        let svg = d3.select("#chart")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")");
+
+        // Add X axis
+        let x = d3.scaleBand()
+            .domain(d3.map(data, function(d) {console.log(d); return d.periodo; }).keys())
+            .range([ 0, width ]);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // Add Y axis
+        let y = d3.scaleLinear()
+            .domain([0, 100])
+            .range([ height, 0 ]);
+        svg.append("g")
+            .call(d3.axisLeft(y).ticks(5));
+
+        // color palette
+        let res = sumstat.map(function(d){ return d.key; });
+
+        let color = d3.scaleOrdinal()
+            .domain(res)
+            .range([COLOR_PRIMARY_1, COLOR_COMP_2, COLOR_COMP_1, COLOR_GREY_1, COLOR_GREY_2, COLOR_OTHER_1, COLOR_OTHER_2]); 
+
+        function init() {
+            svg.selectAll(".line")
+                .data(sumstat)
+                .enter()
+                .append("path")
+                .attr('class', 'lines')
+                .attr("fill", "none")
+                .attr("stroke", function(d){ return color(d.key) })
+                .attr("opacity", function(d) {
+                    console.log(d);
+                    if(d.key.split('-')[0] == 'Mujeres') {
+                        return '1';
+                    } else {
+                        return '0.5';
+                    }
+                })
+                .attr("stroke-width", '2')
+                .attr("d", function(d){
+                    return d3.line()
+                        .x(function(d) { return x(d.periodo) + x.bandwidth() / 2; })
+                        .y(function(d) { return y(+d.Total); })
+                        (d.values)
+                });
         }
 
         function animateChart() {

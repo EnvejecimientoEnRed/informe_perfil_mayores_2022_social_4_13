@@ -22,12 +22,12 @@
                 </div>
                 <div class="chart__logics">
                     <div class="chart__legend">
-                        <span class="chart__legend--item comp_2">De 16 a 24 años </span>
-                        <span class="chart__legend--item primary_1">De 25 a 34</span>
+                        <span class="chart__legend--item primary_1">De 16 a 24 años </span>
+                        <span class="chart__legend--item comp_2">De 25 a 34</span>
                         <span class="chart__legend--item comp_1">De 35 a 44</span>
-                        <span class="chart__legend--item other_2">De 45 a 54</span>
-                        <span class="chart__legend--item comp_1">De 55 a 64</span>
-                        <span class="chart__legend--item other_2">De 65 a 74</span>
+                        <span class="chart__legend--item grey_1">De 45 a 54</span>
+                        <span class="chart__legend--item grey_2">De 55 a 64</span>
+                        <span class="chart__legend--item other_1">De 65 a 74</span>
                         <span class="chart__legend--item other_2">75 o más</span>
                     </div>
                     <div class="chart__animate" id="replay">
@@ -40,8 +40,13 @@
                 <div class="chart__logics--bis">
                     <p>Seleccione qué sexo desea que se visualice con líneas más pronunciadas</p>
                     <select name="edad" id="viz_edad">
-                        <option value="Mujeres">Mujeres</option>
-                        <option value="Hombres">Hombres</option>
+                        <option value="16_24">De 16 a 24 años</option>
+                        <option value="25_34">De 25 a 34</option>
+                        <option value="35_44">De 35 a 44</option>
+                        <option value="45_54">De 45 a 54</option>
+                        <option value="55_64">De 55 a 64</option>
+                        <option value="65_74">De 65 a 74</option>
+                        <option value="75mas">75 o más</option>
                       </select>
                 </div>
                 <div class="chart__viz" id="chart"></div>
