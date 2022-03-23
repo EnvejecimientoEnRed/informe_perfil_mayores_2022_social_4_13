@@ -47,7 +47,7 @@ export function initChart(iframe) {
 
         // Add X axis
         let x = d3.scaleBand()
-            .domain(d3.map(data, function(d) {console.log(d); return d.periodo; }).keys())
+            .domain(d3.map(data, function(d) { return d.periodo; }).keys())
             .range([ 0, width ]);
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
@@ -76,14 +76,19 @@ export function initChart(iframe) {
                 .attr("fill", "none")
                 .attr("stroke", function(d){ return color(d.key) })
                 .attr("opacity", function(d) {
-                    console.log(d);
-                    if(d.key.split('-')[0] == 'Mujeres') {
+                    if(d.key == 'De 65 a 74 años') {
                         return '1';
                     } else {
-                        return '0.5';
+                        return '0.35';
                     }
                 })
-                .attr("stroke-width", '2')
+                .attr("stroke-width", function(d) {
+                    if(d.key == 'De 65 a 74 años') {
+                        return '3';
+                    } else {
+                        return '1.5';
+                    }
+                })
                 .attr("d", function(d){
                     return d3.line()
                         .x(function(d) { return x(d.periodo) + x.bandwidth() / 2; })
@@ -96,6 +101,31 @@ export function initChart(iframe) {
 
         }
 
+        function setChart(edad) {
+            svg.selectAll(".lines")
+                .attr("fill", "none")
+                .attr("stroke", function(d){ return color(d.key) })
+                .attr("opacity", function(d) {
+                    if(d.key == edad) {
+                        return '1';
+                    } else {
+                        return '0.35';
+                    }
+                })
+                .attr("stroke-width", function(d) {
+                    if(d.key == edad) {
+                        return '3';
+                    } else {
+                        return '1.5';
+                    }
+                })
+                .attr("d", function(d){
+                    return d3.line()
+                        .x(function(d) { return x(d.periodo) + x.bandwidth() / 2; })
+                        .y(function(d) { return y(+d.Total); })
+                        (d.values)
+                });
+        }
 
         /////
         /////
@@ -130,11 +160,13 @@ export function initChart(iframe) {
 
         //Captura de pantalla de la visualización
         setChartCanvas();
+        setCustomCanvas();
 
         let pngDownload = document.getElementById('pngImage');
 
         pngDownload.addEventListener('click', function(){
             setChartCanvasImage('uso_internet');
+            setChartCustomCanvasImage('uso_internet');
         });
 
         //Altura del frame
