@@ -1,23 +1,21 @@
 //Desarrollo de las visualizaciones
 import * as d3 from 'd3';
-//import { numberWithCommas2 } from './helpers';
-//import { getInTooltip, getOutTooltip, positionTooltip } from './modules/tooltip';
+import { numberWithCommas3 } from '../helpers';
+import { getInTooltip, getOutTooltip, positionTooltip } from '../modules/tooltip';
 import { setChartHeight } from '../modules/height';
 import { setChartCanvas, setChartCanvasImage } from '../modules/canvas-image';
 import { setRRSSLinks } from '../modules/rrss';
 import { setFixedIframeUrl } from './chart_helpers';
 
 //Colores fijos
-const COLOR_PRIMARY_1 = '#F8B05C', 
-COLOR_PRIMARY_2 = '#E37A42', 
-COLOR_ANAG_1 = '#D1834F', 
-COLOR_ANAG_2 = '#BF2727', 
+const COLOR_PRIMARY_1 = '#F8B05C',
 COLOR_COMP_1 = '#528FAD', 
-COLOR_COMP_2 = '#AADCE0', 
-COLOR_GREY_1 = '#B5ABA4', 
-COLOR_GREY_2 = '#64605A', 
-COLOR_OTHER_1 = '#B58753', 
-COLOR_OTHER_2 = '#731854';
+COLOR_COMP_2 = '#AADCE0',
+COLOR_ANAG__PRIM_1 = '#BA9D5F', 
+COLOR_ANAG_PRIM_2 = '#9E6C51',
+COLOR_ANAG_PRIM_3 = '#9E3515',
+COLOR_ANAG_COMP_1 = '#1C5A5E';
+let tooltip = d3.select('#tooltip');
 
 export function initChart(iframe) {
     //Desarrollo del gráfico
@@ -26,8 +24,8 @@ export function initChart(iframe) {
 
         data = data.filter(function(item){if(item['Características demográficas'] != 'Total Personas'){ return item; }});
 
-        ///// Desarrollo de los tres gráficos
-        let currentEdad = '65_74';
+        ///// Desarrollo del gráfico
+        let paths;
 
         let margin = {top: 10, right: 10, bottom: 30, left: 35},
             width = document.getElementById('chart').clientWidth - margin.left - margin.right,
@@ -65,66 +63,94 @@ export function initChart(iframe) {
 
         let color = d3.scaleOrdinal()
             .domain(res)
-            .range([COLOR_PRIMARY_1, COLOR_COMP_2, COLOR_COMP_1, COLOR_GREY_1, COLOR_GREY_2, COLOR_OTHER_1, COLOR_OTHER_2]); 
+            .range([COLOR_PRIMARY_1, COLOR_ANAG__PRIM_1, COLOR_COMP_2, COLOR_COMP_1, COLOR_ANAG_COMP_1, COLOR_ANAG_PRIM_2, COLOR_ANAG_PRIM_3]); 
 
         function init() {
             svg.selectAll(".line")
                 .data(sumstat)
                 .enter()
                 .append("path")
-                .attr('class', 'lines')
+                .attr('class', 'rect')
                 .attr("fill", "none")
                 .attr("stroke", function(d){ return color(d.key) })
-                .attr("opacity", function(d) {
-                    if(d.key == 'De 65 a 74 años') {
-                        return '1';
-                    } else {
-                        return '0.35';
-                    }
-                })
-                .attr("stroke-width", function(d) {
-                    if(d.key == 'De 65 a 74 años') {
-                        return '3';
-                    } else {
-                        return '1.5';
-                    }
-                })
+                .attr("opacity", 1)
+                .attr("stroke-width", 2)
                 .attr("d", function(d){
                     return d3.line()
                         .x(function(d) { return x(d.periodo) + x.bandwidth() / 2; })
                         .y(function(d) { return y(+d.Total); })
                         (d.values)
+                });
+
+            paths = svg.selectAll('.rect');
+
+            paths.attr("stroke-dasharray", 968 + " " + 968)
+                .attr("stroke-dashoffset", 968)
+                .transition()
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0)
+                .duration(2000);
+
+            /// Círculos
+            svg.selectAll('circles')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('cx', function(d) {
+                    return x(d.periodo) + x.bandwidth() / 2;;
+                })
+                .attr('cy', function(d) {
+                    return y(+d.Total);
+                })
+                .attr('class', function(d) {
+                    return 'circle circle_' + d.periodo;
+                })
+                .attr('r', 3)
+                .attr('stroke', 'none')
+                .attr('fill', 'transparent')
+                .on('mouseover', function(d,i,e) {
+                    //Opacidad en círculos
+                    let css = e[i].getAttribute('class').split(' ')[1];
+                    let circles = svg.selectAll('.circle');                    
+            
+                    circles.each(function() {
+                        //this.style.stroke = '0.4';
+                        let split = this.getAttribute('class').split(" ")[1];
+                        if(split == `${css}`) {
+                            this.style.stroke = 'black';
+                            this.style.strokeWidth = '1';
+                        }
+                    });
+
+                    //Texto
+                    let html = '<p class="chart__tooltip--title">' + d['Características demográficas'] + ' (' + d.periodo + ')</p>' + 
+                        '<p class="chart__tooltip--text">El uso de Internet en los últimos tres meses para esta franja de edad es del <b>' + numberWithCommas3(d.Total) + '%</b> en ' + d.periodo +'</p>';
+                
+                    tooltip.html(html);
+
+                    //Tooltip
+                    positionTooltip(window.event, tooltip);
+                    getInTooltip(tooltip);
+                })
+                .on('mouseout', function(d,i,e) {
+                    //Quitamos los estilos de la línea
+                    let circles = svg.selectAll('.circle');
+                    circles.each(function() {
+                        this.style.stroke = 'none';
+                    });
+                
+                    //Quitamos el tooltip
+                    getOutTooltip(tooltip);
                 });
         }
 
         function animateChart() {
-
-        }
-
-        function setChart(edad) {
-            svg.selectAll(".lines")
-                .attr("fill", "none")
-                .attr("stroke", function(d){ return color(d.key) })
-                .attr("opacity", function(d) {
-                    if(d.key == edad) {
-                        return '1';
-                    } else {
-                        return '0.35';
-                    }
-                })
-                .attr("stroke-width", function(d) {
-                    if(d.key == edad) {
-                        return '3';
-                    } else {
-                        return '1.5';
-                    }
-                })
-                .attr("d", function(d){
-                    return d3.line()
-                        .x(function(d) { return x(d.periodo) + x.bandwidth() / 2; })
-                        .y(function(d) { return y(+d.Total); })
-                        (d.values)
-                });
+            paths.attr("stroke-dasharray", 1000 + " " + 1000)
+                .attr("stroke-dashoffset", 1000)
+                .transition()
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0)
+                .duration(2000);
         }
 
         /////
@@ -132,18 +158,12 @@ export function initChart(iframe) {
         // Resto - Chart
         /////
         /////
+        
         init();
 
         //Animación del gráfico
         document.getElementById('replay').addEventListener('click', function() {
             animateChart();
-        });
-
-        document.getElementById('viz_edad').addEventListener('change', function(e) {
-            if(currentEdad != e.target.value) {
-                currentEdad = e.target.value;
-                setChart(currentEdad);
-            }            
         });
 
         /////
