@@ -47,16 +47,41 @@ export function initChart(iframe) {
         let x = d3.scaleBand()
             .domain(d3.map(data, function(d) { return d.periodo; }).keys())
             .range([ 0, width ]);
+        
+        let xAxis = function(svg) {
+            svg.call(d3.axisBottom(x).tickValues(x.domain().filter(function(d,i){ if(i == 1 || i == 4 || i == 8 || i == 12 || i == 16 || i == data.length - 1){ return d; } })));
+            svg.call(function(g){g.selectAll('.tick line').remove()});
+            svg.call(function(g){g.select('.domain').remove()});
+        }
+
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+            .call(xAxis);
 
         // Add Y axis
         let y = d3.scaleLinear()
             .domain([0, 100])
             .range([ height, 0 ]);
+        
+        let yAxis = function(svg) {
+            svg.call(d3.axisLeft(y).ticks(5).tickFormat(function(d,i) { return numberWithCommas3(d); }));
+            svg.call(function(g) {
+                g.call(function(g){
+                    g.selectAll('.tick line')
+                        .attr('class', function(d,i) {
+                            if (d == 0) {
+                                return 'line-special';
+                            }
+                        })
+                        .attr('x1', '0%')
+                        .attr('x2', `${width}`)
+                });
+            });
+        }
+
         svg.append("g")
-            .call(d3.axisLeft(y).ticks(5));
+            .attr("class", "yaxis")
+            .call(yAxis);
 
         // color palette
         let res = sumstat.map(function(d){ return d.key; });
