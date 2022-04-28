@@ -27,7 +27,7 @@ export function initChart() {
         ///// Desarrollo del gráfico
         let paths;
 
-        let margin = {top: 10, right: 10, bottom: 30, left: 35},
+        let margin = {top: 12.5, right: 10, bottom: 25, left: 35},
             width = document.getElementById('chart').clientWidth - margin.left - margin.right,
             height = document.getElementById('chart').clientHeight - margin.top - margin.bottom;
 
