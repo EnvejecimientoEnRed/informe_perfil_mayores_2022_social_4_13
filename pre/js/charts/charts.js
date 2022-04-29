@@ -49,7 +49,7 @@ export function initChart() {
             .range([ 0, width ]);
         
         let xAxis = function(svg) {
-            svg.call(d3.axisBottom(x).tickValues(x.domain().filter(function(d,i){ if(i == 1 || i == 4 || i == 8 || i == 12 || i == 16 || i == data.length - 1){ return d; } })));
+            svg.call(d3.axisBottom(x).tickValues(x.domain().filter(function(d,i){ if(i == 0 || i == 3 || i == 6 || i == 9 || i == 12 || i == 15){ return d; } })));
             svg.call(function(g){g.selectAll('.tick line').remove()});
             svg.call(function(g){g.select('.domain').remove()});
         }
